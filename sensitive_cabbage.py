@@ -135,3 +135,21 @@ def break_text_into_lines(text, image, font):
             line = [word]
 
     return " ".join(words)
+
+
+class Picture:
+    def __init__(self):
+        self.img_data =
+        self.height, self.width = 
+        self.title = 
+        self.fontsize = 1
+
+    @property
+    def font(self):
+        return ImageFont.truetype(path, self.fontsize, encoding="unic")
+    
+
+
+class Video:
+    def __init__(self):
+        pass
