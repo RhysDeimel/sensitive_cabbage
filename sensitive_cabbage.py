@@ -3,7 +3,7 @@ import logging
 import requests
 import sqlite3
 import os
-from PIL import Image
+from PIL import Image, ImageFont
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -12,22 +12,22 @@ USER = ""  # TODO - make this a commandline arg
 URL = f"https://api.pushshift.io/reddit/search/submission/"
 
 # create user directory
-if not os.path.exists(USER):
-    logging.debug(f" User: {USER} does not exist, creating folder.")
-    os.mkdir(USER)
+# if not os.path.exists(USER):
+#     logging.debug(f" User: {USER} does not exist, creating folder.")
+#     os.mkdir(USER)
 
-if not os.path.exists(f"{USER}/posts.db"):
-    logging.debug(f" User: {USER} does not have a post record. Creating.")
-    # create DB for reference
-    conn = sqlite3.connect(f"{USER}/posts.db")
-    c = conn.cursor()
-    c.execute(
-        """
-		CREATE TABLE posts (id text, created_utc integer, title text, hash text, duplicate integer)
-		"""
-    )
-    conn.commit()
-    conn.close()
+# if not os.path.exists(f"{USER}/posts.db"):
+#     logging.debug(f" User: {USER} does not have a post record. Creating.")
+#     # create DB for reference
+#     conn = sqlite3.connect(f"{USER}/posts.db")
+#     c = conn.cursor()
+#     c.execute(
+#         """
+# 		CREATE TABLE posts (id text, created_utc integer, title text, hash text, duplicate integer)
+# 		"""
+#     )
+#     conn.commit()
+#     conn.close()
 
 # check db for most recent record
 # "SELECT * FROM posts ORDER BY created_utc DESC LIMIT 1"
@@ -138,18 +138,49 @@ def break_text_into_lines(text, image, font):
 
 
 class Picture:
-    def __init__(self):
-        self.img_data =
-        self.height, self.width = 
-        self.title = 
-        self.fontsize = 1
+    def __init__(self, url, title, timestamp):
+        # updated args to match what I'm actually going to give this
 
-    @property
-    def font(self):
-        return ImageFont.truetype(path, self.fontsize, encoding="unic")
+        # self.img_data = data
+        # self.height, self.width = dimensions
+        # self.title = title
+        # self.fontsize = 1
+
+    # @property
+    # def font(self):
+    #     path = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+    #     return ImageFont.truetype(path, self.fontsize, encoding="unic")
+
+    def generate(self):
+        # generates font, updates image, and saves to disk
+        pass
     
 
 
 class Video:
     def __init__(self):
         pass
+
+
+# # Some ghetto code testing out pushshift
+# end = int(time.time())
+# start = end - 86400
+# # go backwards
+# while True:
+#     r = requests.get(URL + f"?author={USER}&after={start}&before={end}&size=100&sort=asc")
+#     data = r.json()["data"]
+#     if not data:
+#         break
+
+#     for post in data:
+#             download(post["url"], name=post["created_utc"])
+
+#         if not is_duplicate():
+#             add_text(post["title"])
+#         else:
+#             delete(post["created_utc"])
+
+#         record_details(post)
+
+#     end = start
+#     start -= 86400
