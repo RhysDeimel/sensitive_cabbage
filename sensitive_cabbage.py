@@ -5,11 +5,17 @@ import sqlite3
 import os
 from PIL import Image, ImageFont
 
+from io import BytesIO
+
+import time
+
+import tempfile
+
 logging.basicConfig(level=logging.DEBUG)
 
 # given a reddit user, leverage pushshift to iterate through content and archive
 USER = ""  # TODO - make this a commandline arg
-URL = f"https://api.pushshift.io/reddit/search/submission/"
+URL = "https://api.pushshift.io/reddit/search/submission/"
 
 # create user directory
 # if not os.path.exists(USER):
@@ -37,7 +43,6 @@ URL = f"https://api.pushshift.io/reddit/search/submission/"
 # if not, download image and check if hash already exists and dedupe
 # save hash
 # Add title text to bottom of image
-
 
 
 # Get dimensions of image, make a new blank image that is larger, then
@@ -73,7 +78,6 @@ URL = f"https://api.pushshift.io/reddit/search/submission/"
 #         break
 
 
-
 def calc_font_size(image, text):
     """
     Calculate size based on height of image
@@ -84,7 +88,7 @@ def calc_font_size(image, text):
     path = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
     fontsize = 1
     jumpsize = 75
-    breakpoint = 0.03 * image.size[1] # use image height
+    breakpoint = 0.03 * image.size[1]  # use image height
 
     font = ImageFont.truetype(path, fontsize, encoding="unic")
     while True:
@@ -98,11 +102,10 @@ def calc_font_size(image, text):
             fontsize -= jumpsize
 
         font = ImageFont.truetype(path, fontsize, encoding="unic")
-        
+
         if jumpsize <= 1:
             print("exiting")
             break
-
 
     return font
 
@@ -124,13 +127,12 @@ def break_text_into_lines(text, image, font):
 
     draw = ImageDraw.Draw(image)
 
-
     line = []
     for position, word in enumerate(words):
         line.append(word)
 
         if draw.textsize(" ".join(line), font)[0] >= maxwidth:
-            words[position] = '\n' + word
+            words[position] = "\n" + word
 
             line = [word]
 
@@ -138,23 +140,22 @@ def break_text_into_lines(text, image, font):
 
 
 class Picture:
-    def __init__(self, url, title, timestamp):
-        # updated args to match what I'm actually going to give this
+    def __init__(self, content, title, created_utc):
+        self.i = Image.open(BytesIO(content))
+        self.hash = imagehash.average_hash(self.i)
 
-        # self.img_data = data
-        # self.height, self.width = dimensions
-        # self.title = title
-        # self.fontsize = 1
+        self.title = title
+        self.created_utc = created_utc
+        self.fontsize = 1
 
-    # @property
-    # def font(self):
-    #     path = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
-    #     return ImageFont.truetype(path, self.fontsize, encoding="unic")
+    @property
+    def font(self):
+        path = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+        return ImageFont.truetype(path, self.fontsize, encoding="unic")
 
     def generate(self):
         # generates font, updates image, and saves to disk
         pass
-    
 
 
 class Video:
@@ -184,3 +185,33 @@ class Video:
 
 #     end = start
 #     start -= 86400
+
+if __name__ == "__main__":
+    url = "http://localhost:8000/in.jpg"
+    title = (
+        "Pilots of the 120th Air Defense Fighter Aviation Regiment take an oath to the Guards banner."
+        " The 120th Fighter Aviation Regiment became the 12th Guards Fighter Aviation Regiment."
+        " Behind the personnel are MiG-3 fighters, with which the 120th Air Defense IAP (12th Air "
+        "Defense GIAP) of the city of Mos"
+    )
+    created = int(time.time())
+    
+    r = requests.get(url)
+
+    test = Picture(r.content, title, created)
+
+
+
+
+# to check hash of image:
+
+# from PIL import Image
+# import imagehash
+# hash0 = imagehash.average_hash(Image.open('quora_photo.jpg')) 
+# hash1 = imagehash.average_hash(Image.open('twitter_photo.jpeg')) 
+# cutoff = 5
+
+# if hash0 - hash1 < cutoff:
+#   print('images are similar')
+# else:
+#   print('images are not similar'
